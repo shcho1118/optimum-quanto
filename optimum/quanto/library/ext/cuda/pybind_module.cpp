@@ -16,6 +16,7 @@
 #include "awq/v2/gemm_cuda.h"
 #include "awq/v2/gemv_cuda.h"
 #include "unpack.h"
+#include "marlin/marlin_sz_cuda.h"
 
 // !IMPORTANT! Some python objects such as dtype, device, are not mapped to C++ types,
 // and need to be explicitly converted using dedicated helpers before calling a C++ method.
@@ -28,4 +29,5 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
   m.def("awq_v2_gemm_f16i4", &awq_v2_gemm_f16i4, "awq_v2_gemm_f16i4");
   m.def("awq_v2_gemv_f16i4", &awq_v2_gemv_f16i4, "awq_v2_gemv_f16i4");
   m.def("unpack", &unpack, "unpack");
+  m.def("marlin_gemm_f16i4", &mul, "marlin_gemm_f16i4");
 }

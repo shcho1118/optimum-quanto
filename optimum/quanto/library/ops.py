@@ -82,3 +82,12 @@ define(
     " int group_size)"
     " -> Tensor",
 )
+define(
+    "gemm_marlin",
+    "(Tensor input,"
+    " Tensor other,"
+    " Tensor other_scale,"
+    " Tensor other_zeropoint,"
+    " Tensor workspace)"
+    " -> Tensor",
+)

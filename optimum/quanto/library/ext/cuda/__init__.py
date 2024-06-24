@@ -68,6 +68,8 @@ def ext():
         extra_cuda_cflags += [f"-DQUANTO_CUDA_ARCH={quanto_cuda_arch}"]
         module_path = os.path.dirname(__file__)
         sources = [
+            f"{module_path}/marlin/marlin_sz_cuda_kernel.cu",
+            f"{module_path}/marlin/marlin_sz_cuda.cpp",
             f"{module_path}/unpack.cu",
             f"{module_path}/awq/v2/gemm_cuda.cu",
             f"{module_path}/awq/v2/gemv_cuda.cu",
@@ -111,3 +113,32 @@ def gemm_cuda(
     if rows < 8:
         return ext().awq_v2_gemv_f16i4(input, other, scales, zeropoint, rows, out_cols, in_cols, group_size)
     return ext().awq_v2_gemm_f16i4(input, other, scales, zeropoint)
+
+
+@torch.library.impl("quanto_ext::gemm_marlin", ["CUDA"])
+def gemm_marlin_cuda(
+    input: torch.Tensor, other: torch.Tensor, scales: torch.Tensor, zeropoint: torch.Tensor, workspace: torch.Tensor
+):
+    assert input.dtype == torch.float16
+    assert other.dtype == torch.int32
+    assert scales.dtype == torch.float16
+    assert zeropoint.dtype == torch.float16
+    assert workspace.dtype == torch.int32
+    output = torch.empty(
+        input.shape[:-1] + (scales.shape[1],),
+        dtype=input.dtype,
+        device=input.device,
+    )
+    ext().marlin_gemm_f16i4(
+        input.view((-1, input.shape[-1])),
+        other,
+        output.view((-1, output.shape[-1])),
+        scales,
+        zeropoint,
+        workspace,
+        -1,
+        -1,
+        -1,
+        16,
+    )
+    return output
