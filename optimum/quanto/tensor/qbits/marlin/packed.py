@@ -56,7 +56,7 @@ def pack(unpacked: torch.Tensor):
     w = unpacked
     N, K = w.shape
     w = unpacked.t()
-    # 16 == tile size, marlin uses 16x16 tile, so 16x16 grouping via interleaving 
+    # 16 == tile size, marlin uses 16x16 tile, so 16x16 grouping via interleaving
     w = w.reshape((K // 16, 16, N // 16, 16))
     w = w.permute((0, 2, 1, 3))
     w = w.reshape((K // 16, N * 16))
